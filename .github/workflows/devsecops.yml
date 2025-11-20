@@ -59,7 +59,7 @@ jobs:
           sudo dpkg -i trivy_${TRIVY_VERSION}_Linux-64bit.deb
 
       - name: Run Trivy FS scan
-        run: trivy fs --scanners vuln --format json --output trivy-report.json lurj_project/
+        run: trivy fs --scanners vuln --format json --output trivy-report.json juice-shop/
 
 
       - name: Upload Trivy report
