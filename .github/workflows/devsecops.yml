@@ -18,7 +18,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Run Semgrep
         uses: returntocorp/semgrep-action@v1
         continue-on-error: true
@@ -26,7 +25,6 @@ jobs:
           config: auto
           generateSarif: true
           output: semgrep.sarif
-
       - name: Upload SAST report
         uses: actions/upload-artifact@v4
         with:
@@ -42,7 +40,6 @@ jobs:
     needs: sast
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Trivy
         run: |
           sudo apt-get update -y
@@ -54,13 +51,8 @@ jobs:
             sleep 10
           done
           sudo dpkg -i trivy_${TRIVY_VERSION}_Linux-64bit.deb
-
-      - name: Show repo structure
-        run: ls -R
-
       - name: Run Trivy FS scan
         run: trivy fs --scanners vuln --format json --output trivy-report.json .
-
       - name: Upload Trivy report
         uses: actions/upload-artifact@v4
         with:
@@ -79,20 +71,16 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-
       - name: Login to GHCR
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
       - name: Build Docker image
-        run: |
-          docker build -t $IMAGE_NAME:$DOCKER_TAG .
-
+        run: docker build -t $IMAGE_NAME:$DOCKER_TAG .
       - name: Push Docker image
         run: docker push $IMAGE_NAME:$DOCKER_TAG
 
   # ------------------------------
-  # Stage 4: DAST (OWASP ZAP Baseline)
+  # Stage 4: DAST (OWASP ZAP)
   # ------------------------------
   dast:
     name: DAST (OWASP ZAP)
@@ -100,19 +88,13 @@ jobs:
     needs: docker_build
     steps:
       - uses: actions/checkout@v4
-
       - name: Run Juice Shop container
         run: |
           docker run -d -p 3000:3000 --name juice-shop $IMAGE_NAME:$DOCKER_TAG
           sleep 15
-
       - name: Run ZAP Baseline Scan
         run: |
-          docker run \
-            --network="host" \
-            owasp/zap2docker-stable \
-            zap-baseline.py -t http://localhost:3000 -r zap-report.html
-
+          docker run --network="host" owasp/zap2docker-stable zap-baseline.py -t http://localhost:3000 -r zap-report.html
       - name: Upload ZAP report
         uses: actions/upload-artifact@v4
         with:
