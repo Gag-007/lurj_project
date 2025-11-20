@@ -6,7 +6,7 @@ on:
 
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/juice-shop
+  IMAGE_NAME: ghcr.io/gag-007/lurj_project/juice-shop  # все буквы маленькие
   DOCKER_TAG: ${{ github.sha }}
 
 jobs:
@@ -37,8 +37,6 @@ jobs:
   # ------------------------------
   # Stage 2: Dependency Scan (Trivy)
   # ------------------------------
-# Stage 2: Dependency Scan (Trivy)
-# ------------------------------
   dependency_scanning:
     name: Dependency Scan (Trivy)
     runs-on: ubuntu-latest
@@ -50,26 +48,25 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y wget
-          TRIVY_VERSION="0.45.0"  # конкретная стабильная версия
+          TRIVY_VERSION="0.45.0"
           for i in {1..5}; do
             wget https://github.com/aquasecurity/trivy/releases/download/v$TRIVY_VERSION/trivy_${TRIVY_VERSION}_Linux-64bit.deb && break
             echo "Повторная попытка через 10 секунд..."
             sleep 10
           done
           sudo dpkg -i trivy_${TRIVY_VERSION}_Linux-64bit.deb
-      - name: Run Trivy FS scan 
-        run: ls -l 
-        #run: trivy fs --scanners vuln --format json --output trivy-report.json juice-shop/
+
       - name: Show repo structure
         run: ls -R
 
+      - name: Run Trivy FS scan
+        run: trivy fs --scanners vuln --format json --output trivy-report.json .
 
       - name: Upload Trivy report
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report
           path: trivy-report.json
-
 
   # ------------------------------
   # Stage 3: Docker Build & Push
@@ -81,13 +78,13 @@ jobs:
     permissions:
       packages: write
       contents: read
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Login to GHCR
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Build Docker image
         run: docker build -t $IMAGE_NAME:$DOCKER_TAG .
 
@@ -108,12 +105,14 @@ jobs:
         run: |
           docker run -d -p 3000:3000 --name juice-shop $IMAGE_NAME:$DOCKER_TAG
           sleep 15
+
       - name: Run ZAP Baseline Scan
         run: |
           docker run \
             --network="host" \
             owasp/zap2docker-stable \
             zap-baseline.py -t http://localhost:3000 -r zap-report.html
+
       - name: Upload ZAP report
         uses: actions/upload-artifact@v4
         with:
