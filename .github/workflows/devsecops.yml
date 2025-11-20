@@ -1,6 +1,8 @@
-
 name: DevSecOps Pipeline
 
+# ------------------------------
+# Workflow запускается на push и pull request в ветку main
+# ------------------------------
 on:
   push:
     branches: [ main ]
