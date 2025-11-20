@@ -59,7 +59,8 @@ jobs:
           sudo dpkg -i trivy_${TRIVY_VERSION}_Linux-64bit.deb
 
       - name: Run Trivy FS scan
-        run: trivy fs --security-checks vuln --format json --output trivy-report.json app/
+        run: trivy fs --scanners vuln --format json --output trivy-report.json lurj_project/
+
 
       - name: Upload Trivy report
         uses: actions/upload-artifact@v4
