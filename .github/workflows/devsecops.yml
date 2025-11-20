@@ -58,7 +58,8 @@ jobs:
           done
           sudo dpkg -i trivy_${TRIVY_VERSION}_Linux-64bit.deb
 
-      - name: Run Trivy FS scan
+      - name: Run Trivy FS scan 
+        run: ls -l 
         run: trivy fs --scanners vuln --format json --output trivy-report.json juice-shop/
 
 
