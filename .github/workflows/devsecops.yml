@@ -61,6 +61,8 @@ jobs:
       - name: Run Trivy FS scan 
         run: ls -l 
         #run: trivy fs --scanners vuln --format json --output trivy-report.json juice-shop/
+      - name: Show repo structure
+        run: ls -R
 
 
       - name: Upload Trivy report
