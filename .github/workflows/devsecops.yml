@@ -18,7 +18,7 @@ jobs:
     name: SAST (Semgrep)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Run Semgrep
         uses: returntocorp/semgrep-action@v1
@@ -28,7 +28,7 @@ jobs:
           output: semgrep.sarif
 
       - name: Upload SAST report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: semgrep-report
           path: semgrep.sarif
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: sast
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Trivy
         run: |
@@ -54,7 +54,7 @@ jobs:
         run: trivy fs --security-checks vuln --format json --output trivy-report.json app/
 
       - name: Upload Trivy report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: trivy-report
           path: trivy-report.json
@@ -71,7 +71,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Login to GHCR
         run: |
@@ -91,12 +91,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: docker_build
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Run Juice Shop container
         run: |
           docker run -d -p 3000:3000 --name juice-shop $IMAGE_NAME:$DOCKER_TAG
-          sleep 10
+          sleep 15
 
       - name: Run ZAP Baseline Scan
         run: |
@@ -106,7 +106,7 @@ jobs:
             zap-baseline.py -t http://localhost:3000 -r zap-report.html
 
       - name: Upload ZAP report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zap-report
           path: zap-report.html
