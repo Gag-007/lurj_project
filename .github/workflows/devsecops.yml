@@ -72,27 +72,32 @@ jobs:
 
   # ------------------------------
   # Stage 3: Docker Build & Push
-  # ------------------------------
-  docker_build:
-    name: Docker Build & Push
-    runs-on: ubuntu-latest
-    needs: dependency_scanning
-    permissions:
-      packages: write
-      contents: read
+# ------------------------------
+docker_build:
+  name: Docker Build & Push
+  runs-on: ubuntu-latest
+  needs: dependency_scanning
+  permissions:
+    packages: write
+    contents: read
 
-    steps:
-      - uses: actions/checkout@v4
+  env:
+    IMAGE_NAME: ghcr.io/gag-007/lurj_project/juice-shop  # <--- все буквы в нижнем регистре
+    DOCKER_TAG: ${{ github.sha }}
 
-      - name: Login to GHCR
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+  steps:
+    - uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t $IMAGE_NAME:$DOCKER_TAG .
+    - name: Login to GHCR
+      run: |
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Push Docker image
-        run: docker push $IMAGE_NAME:$DOCKER_TAG
+    - name: Build Docker image
+      run: docker build -t $IMAGE_NAME:$DOCKER_TAG .
+
+    - name: Push Docker image
+      run: docker push $IMAGE_NAME:$DOCKER_TAG
+
 
   # ------------------------------
   # Stage 4: DAST (OWASP ZAP Baseline)
