@@ -4,9 +4,8 @@ on:
   push:
   pull_request:
 
-
 env:
-  IMAGE_NAME: ghcr.io/gag-007/lurj_project/juice-shop  # все буквы маленькие
+  IMAGE_NAME: ghcr.io/gag-007/lurj_project/juice-shop
   DOCKER_TAG: ${{ github.sha }}
 
 jobs:
@@ -86,7 +85,9 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build Docker image
-        run: docker build -t $IMAGE_NAME:$DOCKER_TAG .
+        run: |
+          # Собираем фронтенд и сервер внутри Docker
+          docker build --build-arg TRIVY_VERSION=0.45.0 -t $IMAGE_NAME:$DOCKER_TAG .
 
       - name: Push Docker image
         run: docker push $IMAGE_NAME:$DOCKER_TAG
