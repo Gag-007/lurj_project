@@ -86,8 +86,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          # Собираем фронтенд и сервер внутри Docker
-          docker build --build-arg TRIVY_VERSION=0.45.0 -t $IMAGE_NAME:$DOCKER_TAG .
+          docker build -t $IMAGE_NAME:$DOCKER_TAG .
 
       - name: Push Docker image
         run: docker push $IMAGE_NAME:$DOCKER_TAG
