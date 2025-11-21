@@ -3,7 +3,6 @@ import { groupBy } from 'lodash-es'
 import { ScoreCardComponent } from '../score-card/score-card.component'
 import { ChallengeCategorySummaryComponent, type ChallengeCategorySummary } from '../challenge-category-list/challenge-category-list.component'
 import { TranslateModule } from '@ngx-translate/core'
-import { JsonPipe } from '@angular/common'
 
 export interface CodingChallenge {
   category: string
@@ -15,12 +14,15 @@ export interface CodingChallenge {
   selector: 'coding-challenge-progress-score-card',
   templateUrl: './coding-challenge-progress-score-card.component.html',
   styleUrls: ['./coding-challenge-progress-score-card.component.scss'],
-  imports: [ScoreCardComponent, ChallengeCategorySummaryComponent, TranslateModule, JsonPipe]
+  imports: [ScoreCardComponent, ChallengeCategorySummaryComponent, TranslateModule]
 })
 export class CodingChallengeProgressScoreCardComponent implements OnInit, OnChanges {
   @Input() allChallenges: CodingChallenge[] = []
 
   public challengeCategories: ChallengeCategorySummary[] = []
+
+  totalScore = 0
+  totalSolved = 0
 
   ngOnInit(): void {
     this.update()
@@ -31,28 +33,25 @@ export class CodingChallengeProgressScoreCardComponent implements OnInit, OnChan
   }
 
   private update(): void {
-    const list = this.allChallenges ?? []
-    this.challengeCategories = this.recalculate(list)
+    this.challengeCategories = this.recalculate(this.allChallenges)
+
+    this.totalScore = this.challengeCategories.reduce((sum, c) => sum + c.total, 0)
+    this.totalSolved = this.challengeCategories.reduce((sum, c) => sum + c.solved, 0)
   }
 
   private recalculate(challenges: CodingChallenge[]): ChallengeCategorySummary[] {
     const grouped = groupBy(challenges, 'category')
 
-    return Object.entries(grouped).map(([category, items]) => {
-      const listArr = items as CodingChallenge[]   // <-- ключевое исправление strict mode
+    return Object.entries(grouped).map(([category, list]) => {
+      const listArr = list as CodingChallenge[]
 
-      const solved = listArr.reduce(
-        (acc, c) => acc + (c.codingChallengeStatus ?? 0),
-        0
-      )
+      const solved = listArr
+        .map(c => c.codingChallengeStatus || 0)
+        .reduce((acc, x) => acc + x, 0)
 
       const total = listArr.filter(c => c.hasCodingChallenge).length * 2
 
-      return {
-        name: category,
-        solved,
-        total
-      }
+      return { name: category, solved, total }
     })
   }
 }
