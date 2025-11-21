@@ -89,30 +89,47 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+     # ------------------------------
+# Stage 4: DAST (OWASP ZAP)
+# ------------------------------
+dast:
+  name: DAST (OWASP ZAP)
+  runs-on: ubuntu-latest
+  needs: docker_build
+  steps:
+    - uses: actions/checkout@v4
 
-      - name: Run Juice Shop container
-        run: |
-          docker run -d -p 3000:3000 --name juice-shop $IMAGE_NAME:$DOCKER_TAG
-          echo "Waiting for Juice Shop to be ready..."
-          sleep 20
+    # Создаём отдельную папку для отчетов ZAP
+    - name: Prepare ZAP workspace
+      run: mkdir -p ${{ github.workspace }}/zap-output
 
-      - name: Create output directory
-        run: mkdir -p zap-output
+    # Запускаем Juice Shop контейнер
+    - name: Run Juice Shop container
+      run: |
+        docker run -d -p 3000:3000 --name juice-shop $IMAGE_NAME:$DOCKER_TAG
+        echo "Waiting for Juice Shop to be ready..."
+        sleep 20
 
-      - name: Run ZAP Baseline Scan
-        run: |
-          mkdir -p ${{ github.workspace }}/zap-output
-          docker run --rm \
-            -v ${{ github.workspace }}/zap-output:/zap/wrk \
-            zaproxy/zap-stable:latest \
-            zap.sh -cmd -autorun /zap/wrk/zap.yaml
-      
-      - name: Upload ZAP reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-reports
-          path: zap-output
+    # Запуск ZAP с отдельной папкой для workspace и чтением zap.yaml
+    - name: Run ZAP Baseline Scan
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}/zap-output:/zap/wrk \
+          -v ${{ github.workspace }}/zap.yaml:/zap/wrk/zap.yaml:ro \
+          --network="juice-shop_default" \
+          zaproxy/zap-stable:latest \
+          zap.sh -cmd -autorun /zap/wrk/zap.yaml
 
+    # Загружаем отчеты
+    - name: Upload ZAP reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: zap-reports
+        path: |
+          zap-output/zap-report.html
+          zap-output/zap-report.json
+
+     
 
 
 
