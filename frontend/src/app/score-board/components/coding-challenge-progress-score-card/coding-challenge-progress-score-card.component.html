@@ -1,7 +1,7 @@
 <score-card
   [description]="'TITLE_CODING_CHALLENGES' | translate"
-  [total]="challengeCategories.reduce((acc, c) => acc + c.total, 0)"
-  [score]="challengeCategories.reduce((acc, c) => acc + c.solved, 0)"
+  [total]="totalScore"
+  [score]="totalSolved"
   [showAsPercentage]="true"
   [hoverEnabled]="true"
 >
@@ -39,5 +39,4 @@
     hover-content
     [challengeCategories]="challengeCategories">
   </challenge-category-list>
-
 </score-card>
