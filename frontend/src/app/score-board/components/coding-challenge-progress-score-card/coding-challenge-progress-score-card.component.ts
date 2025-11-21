@@ -23,26 +23,36 @@ export class CodingChallengeProgressScoreCardComponent implements OnInit, OnChan
   public challengeCategories: ChallengeCategorySummary[] = []
 
   ngOnInit(): void {
-    this.challengeCategories = this.recalculate(this.allChallenges)
+    this.update()
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.challengeCategories = this.recalculate(this.allChallenges)
+    this.update()
+  }
+
+  private update(): void {
+    const list = this.allChallenges ?? []
+    this.challengeCategories = this.recalculate(list)
   }
 
   private recalculate(challenges: CodingChallenge[]): ChallengeCategorySummary[] {
     const grouped = groupBy(challenges, 'category')
 
-    return Object.entries(grouped).map(([category, list]) => {
-      const listArr = list as CodingChallenge[]
+    return Object.entries(grouped).map(([category, items]) => {
+      const listArr = items as CodingChallenge[]   // <-- ключевое исправление strict mode
 
-      const solved = listArr
-        .map(c => c.codingChallengeStatus || 0)
-        .reduce((acc, x) => acc + x, 0)
+      const solved = listArr.reduce(
+        (acc, c) => acc + (c.codingChallengeStatus ?? 0),
+        0
+      )
 
       const total = listArr.filter(c => c.hasCodingChallenge).length * 2
 
-      return { name: category, solved, total }
+      return {
+        name: category,
+        solved,
+        total
+      }
     })
   }
 }
