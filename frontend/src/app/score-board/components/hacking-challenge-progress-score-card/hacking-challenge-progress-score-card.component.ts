@@ -1,4 +1,4 @@
-import { Component, Input, type OnChanges, type OnInit, type SimpleChanges } from '@angular/core'
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core'
 import { type EnrichedChallenge } from '../../types/EnrichedChallenge'
 import { TranslateModule } from '@ngx-translate/core'
 import { ScoreCardComponent } from '../score-card/score-card.component'
@@ -13,28 +13,36 @@ import { type ChallengeCategorySummary, ChallengeCategorySummaryComponent } from
   imports: [ScoreCardComponent, ChallengeCategorySummaryComponent, TranslateModule, JsonPipe]
 })
 export class HackingChallengeProgressScoreCardComponent implements OnInit, OnChanges {
-  @Input()
-  public allChallenges: EnrichedChallenge[] = []
+  @Input() public allChallenges: EnrichedChallenge[] = []
 
-  public solvedChallenges: number
+  public solvedChallenges = 0
   public challengeCategories: ChallengeCategorySummary[] = []
 
-  ngOnInit (): void {
-    this.solvedChallenges = this.allChallenges.filter((challenge) => challenge.solved).length
-    this.challengeCategories = this.calculateChallengeCategorySummary(this.allChallenges)
+  ngOnInit(): void {
+    this.update()
   }
 
-  ngOnChanges (changes: SimpleChanges): void {
-    this.solvedChallenges = this.allChallenges.filter((challenge) => challenge.solved).length
-    this.challengeCategories = this.calculateChallengeCategorySummary(this.allChallenges)
+  ngOnChanges(changes: SimpleChanges): void {
+    this.update()
   }
 
-  private calculateChallengeCategorySummary (challenges: readonly EnrichedChallenge[]): ChallengeCategorySummary[] {
-    const groupedChallenges = groupBy(challenges, 'category')
-    return Object.entries(groupedChallenges).map(([category, challenges]) => ({
-      name: category,
-      solved: challenges.filter(challenge => challenge.solved).length,
-      total: challenges.length
-    }))
+  private update(): void {
+    const list = this.allChallenges ?? []
+
+    this.solvedChallenges = list.filter(c => c.solved).length
+    this.challengeCategories = this.calculateChallengeCategorySummary(list)
+  }
+
+  private calculateChallengeCategorySummary(challenges: EnrichedChallenge[]): ChallengeCategorySummary[] {
+    const grouped = groupBy(challenges, 'category')
+
+    return Object.entries(grouped).map(([category, list]) => {
+      const arr = list as EnrichedChallenge[]
+      return {
+        name: category,
+        solved: arr.filter(c => c.solved).length,
+        total: arr.length
+      }
+    })
   }
 }
