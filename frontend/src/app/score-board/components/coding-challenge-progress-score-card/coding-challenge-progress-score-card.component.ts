@@ -1,53 +1,48 @@
-import { Component, Input, type OnChanges, type OnInit, type SimpleChanges } from '@angular/core'
-
-import { type EnrichedChallenge } from '../../types/EnrichedChallenge'
-import { TranslateModule } from '@ngx-translate/core'
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core'
+import { groupBy } from 'lodash-es'
 import { ScoreCardComponent } from '../score-card/score-card.component'
-import { groupBy, sum } from 'lodash-es'
-import { type ChallengeCategorySummary, ChallengeCategorySummaryComponent } from '../challenge-category-list/challenge-category-list.component'
+import { ChallengeCategorySummaryComponent, type ChallengeCategorySummary } from '../challenge-category-list/challenge-category-list.component'
+import { TranslateModule } from '@ngx-translate/core'
+import { JsonPipe } from '@angular/common'
+
+export interface CodingChallenge {
+  category: string
+  hasCodingChallenge: boolean
+  codingChallengeStatus?: number
+}
 
 @Component({
   selector: 'coding-challenge-progress-score-card',
   templateUrl: './coding-challenge-progress-score-card.component.html',
   styleUrls: ['./coding-challenge-progress-score-card.component.scss'],
-  imports: [ScoreCardComponent, ChallengeCategorySummaryComponent, TranslateModule]
+  imports: [ScoreCardComponent, ChallengeCategorySummaryComponent, TranslateModule, JsonPipe]
 })
 export class CodingChallengeProgressScoreCardComponent implements OnInit, OnChanges {
-  @Input()
-  public allChallenges: EnrichedChallenge[] = []
+  @Input() allChallenges: CodingChallenge[] = []
 
-  public availableCodingChallenges: number
-  public solvedCodingChallenges: number
   public challengeCategories: ChallengeCategorySummary[] = []
 
-  ngOnInit (): void {
-    this.updatedNumberOfSolvedChallenges()
-    this.challengeCategories = this.calculateChallengeCategorySummary(this.allChallenges)
+  ngOnInit(): void {
+    this.challengeCategories = this.recalculate(this.allChallenges)
   }
 
-  ngOnChanges (changes: SimpleChanges): void {
-    this.updatedNumberOfSolvedChallenges()
-    this.challengeCategories = this.calculateChallengeCategorySummary(this.allChallenges)
+  ngOnChanges(changes: SimpleChanges): void {
+    this.challengeCategories = this.recalculate(this.allChallenges)
   }
 
-  private updatedNumberOfSolvedChallenges (): void {
-    const availableCodingChallenges = this.allChallenges
-      .filter((challenge) => challenge.hasCodingChallenge)
+  private recalculate(challenges: CodingChallenge[]): ChallengeCategorySummary[] {
+    const grouped = groupBy(challenges, 'category')
 
-    this.solvedCodingChallenges = sum(availableCodingChallenges
-      .map((challenge) => challenge.codingChallengeStatus || 0))
-    // multiply by 2 because each coding challenge has 2 parts (find it and fix it)
-    this.availableCodingChallenges = availableCodingChallenges.length * 2
-  }
+    return Object.entries(grouped).map(([category, list]) => {
+      const listArr = list as CodingChallenge[]
 
-  private calculateChallengeCategorySummary (challenges: readonly EnrichedChallenge[]): ChallengeCategorySummary[] {
-    const groupedChallenges = groupBy(challenges, 'category')
-    return Object.entries(groupedChallenges).map(([category, challenges]) => {
-      return {
-        name: category,
-        solved: sum(challenges.map(challenge => challenge.codingChallengeStatus || 0)),
-        total: challenges.filter(challenge => challenge.hasCodingChallenge).length * 2 // multiply by 2 because each coding challenge has 2 parts (find it and fix it)
-      }
+      const solved = listArr
+        .map(c => c.codingChallengeStatus || 0)
+        .reduce((acc, x) => acc + x, 0)
+
+      const total = listArr.filter(c => c.hasCodingChallenge).length * 2
+
+      return { name: category, solved, total }
     })
   }
 }
