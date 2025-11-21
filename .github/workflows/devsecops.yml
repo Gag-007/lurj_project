@@ -79,7 +79,7 @@ jobs:
       - name: Push Docker image
         run: docker push $IMAGE_NAME:$DOCKER_TAG
 
-  # ------------------------------
+    # ------------------------------
   # Stage 4: DAST (OWASP ZAP)
   # ------------------------------
   dast:
@@ -114,5 +114,6 @@ jobs:
           path: |
             ./zap-report.html
             ./zap-report.json
+
 
 
