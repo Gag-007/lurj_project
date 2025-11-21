@@ -34,15 +34,16 @@ export class HackingChallengeProgressScoreCardComponent implements OnInit, OnCha
   }
 
   private calculateChallengeCategorySummary(challenges: EnrichedChallenge[]): ChallengeCategorySummary[] {
-    const grouped = groupBy(challenges, 'category')
+  const grouped = groupBy(challenges, 'category')
 
-    return Object.entries(grouped).map(([category, list]) => {
-      const arr = list as EnrichedChallenge[]
-      return {
-        name: category,
-        solved: arr.filter(c => c.solved).length,
-        total: arr.length
-      }
-    })
-  }
+  return Object.entries(grouped).map(([category, list]) => {
+    const arr = list as EnrichedChallenge[] // <-- ключевое исправление
+
+    return {
+      name: category,
+      solved: arr.filter(c => c.solved).length,
+      total: arr.length
+    }
+  })
 }
+
