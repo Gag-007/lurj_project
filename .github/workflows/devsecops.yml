@@ -100,9 +100,11 @@ jobs:
 
       - name: Run ZAP Baseline Scan
         run: |
-          ls -la ${{ github.workspace }}  # проверяем что zap.yaml есть
+          echo "Workspace content:"
+          ls -R ${{ github.workspace }}
+
           docker run --rm \
-            -v ${{ github.workspace }}/zap.yaml:/zap/wrk/zap.yaml \
+            -v ${{ github.workspace }}/frontend/src/zap.yaml:/zap/wrk/zap.yaml \
             zaproxy/zap-stable \
             zap.sh -cmd -autorun /zap/wrk/zap.yaml
       
@@ -111,4 +113,5 @@ jobs:
         with:
           name: zap-reports
           path: zap-output
+
 
