@@ -1,0 +1,26 @@
+env:
+  target: "http://localhost:3000"
+
+jobs:
+  - type: spider
+    parameters:
+      url: "${target}"
+      maxDuration: 60
+
+  - type: passiveScan
+    parameters:
+      maxDuration: 120
+
+  - type: report
+    parameters:
+      template: "traditional-html"
+      reportFile: "zap-report.html"
+      reportDir: "/zap/wrk"
+      reportTitle: "ZAP Scan Report"
+
+  - type: report
+    parameters:
+      template: "traditional-json"
+      reportFile: "zap-report.json"
+      reportDir: "/zap/wrk"
+      reportTitle: "ZAP Scan Report"
