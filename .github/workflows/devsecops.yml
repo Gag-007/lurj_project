@@ -97,8 +97,12 @@ jobs:
         run: docker pull zaproxy/zap-stable:latest
       - name: Run ZAP Baseline Scan
         run: |
-          docker run --rm --link juice-shop:juice-shop -t zaproxy/zap-stable:latest \
-            zap-baseline.py -t http://juice-shop:3000 -r zap-report.html -J zap-report.json
+          docker run --rm --link juice-shop:juice-shop \
+            -v ${{ github.workspace }}:/zap/wrk \
+            -t zaproxy/zap-stable:latest \
+            zap-baseline.py -t http://juice-shop:3000 \
+            -r /zap/wrk/zap-report.html \
+            -J /zap/wrk/zap-report.json
       - name: Upload ZAP reports
         uses: actions/upload-artifact@v4
         with:
@@ -106,3 +110,4 @@ jobs:
           path: |
             zap-report.html
             zap-report.json
+
