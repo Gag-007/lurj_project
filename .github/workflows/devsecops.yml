@@ -88,13 +88,16 @@ jobs:
     needs: docker_build
     steps:
       - uses: actions/checkout@v4
+
       - name: Run Juice Shop container
         run: |
           docker run -d -p 3000:3000 --name juice-shop $IMAGE_NAME:$DOCKER_TAG
           echo "Waiting for Juice Shop to be ready..."
           sleep 20
+
       - name: Pull ZAP Docker image
         run: docker pull zaproxy/zap-stable:latest
+
       - name: Run ZAP Baseline Scan
         run: |
           docker run --rm --link juice-shop:juice-shop \
@@ -103,11 +106,13 @@ jobs:
             zap-baseline.py -t http://juice-shop:3000 \
             -r /zap/wrk/zap-report.html \
             -J /zap/wrk/zap-report.json
+
       - name: Upload ZAP reports
         uses: actions/upload-artifact@v4
         with:
           name: zap-reports
           path: |
-            zap-report.html
-            zap-report.json
+            ./zap-report.html
+            ./zap-report.json
+
 
