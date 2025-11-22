@@ -104,7 +104,8 @@ jobs:
           ls -R ${{ github.workspace }}
 
           docker run --rm \
-            -v ${{ github.workspace }}/frontend/src/zap.yaml:/zap/wrk/zap.yaml \
+            -v ${{ github.workspace }}/zap.yaml:/zap/wrk/zap.yaml \
+            -v ${{ github.workspace }}/zap-output:/zap/wrk/output \
             zaproxy/zap-stable \
             zap.sh -cmd -autorun /zap/wrk/zap.yaml
       
@@ -113,5 +114,6 @@ jobs:
         with:
           name: zap-reports
           path: zap-output
+
 
 
