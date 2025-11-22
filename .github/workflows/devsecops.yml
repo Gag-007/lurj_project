@@ -97,14 +97,15 @@ jobs:
           sleep 20
       - name: Create output directory
         run: mkdir -p zap-output
-
+     
+      - name: Verify zap.yaml exists
+        run: ls -l frontend/src/
+       
+                
       - name: Run ZAP Baseline Scan
         run: |
-          echo "Workspace content:"
-          ls -R ${{ github.workspace }}
-
           docker run --rm \
-            -v ${{ github.workspace }}/zap.yaml:/zap/wrk/zap.yaml \
+            -v ${{ github.workspace }}/zap.yaml:/zap/wrk/zap.yaml:ro \
             -v ${{ github.workspace }}/zap-output:/zap/wrk/output \
             zaproxy/zap-stable \
             zap.sh -cmd -autorun /zap/wrk/zap.yaml
@@ -114,6 +115,7 @@ jobs:
         with:
           name: zap-reports
           path: zap-output
+
 
 
 
