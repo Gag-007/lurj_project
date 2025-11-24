@@ -103,21 +103,19 @@ jobs:
        
                 
       - name: Run ZAP Baseline Scan
-        run: |
-           echo "Workspace content:"
-           ls -R ${{ github.workspace }}
-           
+        run: |   
            docker run --rm \
-            -v ${{ github.workspace }}/frontend/src/zap.yaml:/zap/zap.yaml \
-            -v ${{ github.workspace }}/zap-output:/zap/output \
-            zaproxy/zap-stable \
-            zap.sh -cmd -autorun /zap/zap.yaml
+              -v ${{ github.workspace }}/frontend/src/zap.yaml:/zap/zap.yaml \
+              -v ${{ github.workspace }}/zap-output:/zap/output \
+              zaproxy/zap-stable \
+              zap.sh -cmd -autorun /zap/zap.yaml
       
       - name: Upload ZAP reports
         uses: actions/upload-artifact@v4
         with:
           name: zap-reports
           path: zap-output
+
 
 
 
