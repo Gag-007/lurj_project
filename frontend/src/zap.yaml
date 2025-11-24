@@ -1,15 +1,16 @@
 env:
-  vars:
-    target: "http://localhost:3000"
+  contexts:
+    - name: "default"
+      urls:
+        - "http://localhost:3000"
 
 jobs:
   - type: spider
     parameters:
       context: "default"
-      url: "${target}"
       maxDuration: 60
 
-  - type: passiveScan
+  - type: passiveScan-config
     parameters:
       maxDuration: 120
 
@@ -17,11 +18,10 @@ jobs:
     parameters:
       template: "traditional-html"
       reportFile: "zap-report.html"
-      reportDir: "/zap/wrk/output"
+      reportDir: "/zap/output"
 
   - type: report
     parameters:
       template: "traditional-json"
       reportFile: "zap-report.json"
-      reportDir: "/zap/wrk/output"
-
+      reportDir: "/zap/output"
