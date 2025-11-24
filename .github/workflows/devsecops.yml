@@ -103,7 +103,10 @@ jobs:
        
                 
       - name: Run ZAP Baseline Scan
-        run: |   
+        run: |  
+           echo "Workspace content:"
+           ls -R ${{ github.workspace }}
+           
            docker run --rm \
               -v ${{ github.workspace }}/frontend/src/zap.yaml:/zap/zap.yaml \
               -v ${{ github.workspace }}/zap-output:/zap/output \
@@ -115,6 +118,7 @@ jobs:
         with:
           name: zap-reports
           path: zap-output
+
 
 
 
