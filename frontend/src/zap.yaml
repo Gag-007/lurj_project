@@ -2,7 +2,7 @@ env:
   contexts:
     - name: "default"
       urls:
-        - "http://host.docker.internal:3000"
+        - "http://juice-shop:3000"
 
 jobs:
   - type: spider

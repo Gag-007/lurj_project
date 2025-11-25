@@ -90,6 +90,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create Docker network
+        run: docker network create zapnet
+
       - name: Run Juice Shop container
         run: |
           docker run -d -p 3000:3000 --name juice-shop $IMAGE_NAME:$DOCKER_TAG
