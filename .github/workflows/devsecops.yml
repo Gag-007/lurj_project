@@ -10,26 +10,26 @@ env:
 
 jobs:
 
-  # # ------------------------------
-  # # Stage 1: SAST (Semgrep)
-  # # ------------------------------
-  # sast:
-  #   name: SAST (Semgrep)
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Run Semgrep
-  #       uses: returntocorp/semgrep-action@v1
-  #       continue-on-error: true
-  #       with:
-  #         config: auto
-  #         generateSarif: true
-  #         output: semgrep.sarif
-  #     - name: Upload SAST report
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: semgrep-report
-  #         path: semgrep.sarif
+  # ------------------------------
+  # Stage 1: SAST (Semgrep)
+  # ------------------------------
+  sast:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        continue-on-error: true
+        with:
+          config: auto
+          generateSarif: true
+          output: semgrep.sarif
+      - name: Upload SAST report
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-report
+          path: semgrep.sarif
 
   # # ------------------------------
   # # Stage 2: Dependency Scan (Trivy)
