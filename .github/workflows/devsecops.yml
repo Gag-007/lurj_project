@@ -79,7 +79,7 @@ jobs:
       - name: Push Docker image
         run: docker push $IMAGE_NAME:$DOCKER_TAG
 
-    # ------------------------------
+      # ------------------------------
   # Stage 4: DAST (OWASP ZAP)
   # ------------------------------
   dast:
@@ -90,37 +90,92 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 1. Create Docker network
       - name: Create Docker network
         run: docker network create zapnet
 
+      # 2. Run Juice Shop container
       - name: Run Juice Shop container
         run: |
-          docker run -d -p 3000:3000 --name juice-shop $IMAGE_NAME:$DOCKER_TAG
+          echo "Starting Juice Shop..."
+          docker run -d --network zapnet --name juice-shop $IMAGE_NAME:$DOCKER_TAG
           echo "Waiting for Juice Shop to be ready..."
-          sleep 20
+          sleep 25
+
+      # 3. Create folder for reports
       - name: Create output directory
         run: mkdir -p zap-output
-     
+
+      # 4. Debug: show zap.yaml exists
       - name: Verify zap.yaml exists
         run: ls -l frontend/src/
-       
-                
+
+      # 5. Run ZAP baseline scan
       - name: Run ZAP Baseline Scan
-        run: |  
-           echo "Workspace content:"
-           ls -R ${{ github.workspace }}
-           
-           docker run --rm \
-              -v ${{ github.workspace }}/frontend/src/zap.yaml:/zap/zap.yaml \
-              -v ${{ github.workspace }}/zap-output:/zap/output \
-              zaproxy/zap-stable \
-              zap.sh -cmd -autorun /zap/zap.yaml
-      
-      - name: Upload ZAP reports
+        run: |
+          echo "Running ZAP Baseline Scan..."
+          docker run --rm \
+            --network zapnet \
+            -v ${{ github.workspace }}/frontend/src/zap.yaml:/zap/zap.yaml \
+            -v ${{ github.workspace }}/zap-output:/zap/output \
+            zaproxy/zap-stable \
+            zap.sh -cmd -autorun /zap/zap.yaml
+
+      # 6. Upload Reports
+      - name: Upload ZAP Reports
         uses: actions/upload-artifact@v4
         with:
           name: zap-reports
           path: zap-output
+  # ------------------------------
+  # Stage 4: DAST (OWASP ZAP)
+  # ------------------------------
+  dast:
+    name: DAST (OWASP ZAP)
+    runs-on: ubuntu-latest
+    needs: docker_build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Create Docker network
+      - name: Create Docker network
+        run: docker network create zapnet
+
+      # 2. Run Juice Shop container
+      - name: Run Juice Shop container
+        run: |
+          echo "Starting Juice Shop..."
+          docker run -d --network zapnet --name juice-shop $IMAGE_NAME:$DOCKER_TAG
+          echo "Waiting for Juice Shop to be ready..."
+          sleep 25
+
+      # 3. Create folder for reports
+      - name: Create output directory
+        run: mkdir -p zap-output
+
+      # 4. Debug: show zap.yaml exists
+      - name: Verify zap.yaml exists
+        run: ls -l frontend/src/
+
+      # 5. Run ZAP baseline scan
+      - name: Run ZAP Baseline Scan
+        run: |
+          echo "Running ZAP Baseline Scan..."
+          docker run --rm \
+            --network zapnet \
+            -v ${{ github.workspace }}/frontend/src/zap.yaml:/zap/zap.yaml \
+            -v ${{ github.workspace }}/zap-output:/zap/output \
+            zaproxy/zap-stable \
+            zap.sh -cmd -autorun /zap/zap.yaml
+
+      # 6. Upload Reports
+      - name: Upload ZAP Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-reports
+          path: zap-output
+
 
 
 
