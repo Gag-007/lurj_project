@@ -9,10 +9,7 @@ jobs:
     parameters:
       context: "default"
 
-  - type: passiveScan
-    parameters:
-      scanOnlyInScope: true
-
+ 
   - type: report
     parameters:
       template: traditional-html
