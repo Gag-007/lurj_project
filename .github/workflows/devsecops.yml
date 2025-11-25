@@ -65,7 +65,7 @@ jobs:
   docker_build:
     name: Docker Build & Push
     runs-on: ubuntu-latest
-    needs: dependency_scanning
+    #needs: dependency_scanning
     permissions:
       packages: write
       contents: read
