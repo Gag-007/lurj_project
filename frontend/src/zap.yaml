@@ -8,20 +8,14 @@ jobs:
   - type: spider
     parameters:
       context: "default"
-      maxDuration: 60
 
-  - type: passiveScan-config
+  - type: passiveScan
     parameters:
-      maxDuration: 120
+      scanOnlyInScope: true
 
   - type: report
     parameters:
-      template: "traditional-html"
+      template: traditional-html
+      reportDir: "/zap/output"
       reportFile: "zap-report.html"
-      reportDir: "/zap/output"
-
-  - type: report
-    parameters:
-      template: "traditional-json"
-      reportFile: "zap-report.json"
-      reportDir: "/zap/output"
+      reportTitle: "ZAP Baseline Report"
